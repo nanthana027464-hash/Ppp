@@ -1,0 +1,145 @@
+-- โหลด Rayfield UI Library
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- บริการพื้นฐานของ Roblox
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+
+-- ตัวแปรควบคุมฟังก์ชัน
+local walkSpeedValue = 16
+local antiBaseball = false
+local fastPickaxe = false
+local hackLuck = false
+
+-- สร้าง Window Main
+local Window = Rayfield:CreateWindow({
+   Name = "Ultimate Hack Hub",
+   LoadingTitle = "Loading Script...",
+   LoadingSubtitle = "by Assistant",
+   ConfigurationSaving = {
+      Enabled = false,
+   },
+   Discord = {
+      Enabled = false,
+   },
+   KeySystem = false
+})
+
+-- ==================== TAB MAIN ====================
+local MainTab = Window:CreateTab("Main Features", 4483362458)
+
+-- 1. Slider ปรับความเร็ววิ่ง (Walk Speed)
+local SpeedSlider = MainTab:CreateSlider({
+   Name = "Walk Speed (ความเร็ววิ่ง)",
+   Range = {16, 300},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "SpeedSlider",
+   Callback = function(Value)
+      walkSpeedValue = Value
+      if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+         LocalPlayer.Character.Humanoid.WalkSpeed = Value
+      end
+   end,
+})
+
+-- ล็อกความเร็วไว้เมื่อตัวละครเกิดใหม่
+LocalPlayer.CharacterAdded:Connect(function(char)
+   local humanoid = char:WaitForChild("Humanoid", 5)
+   if humanoid then
+      humanoid.WalkSpeed = walkSpeedValue
+   end
+end)
+
+-- 2. Toggle ป้องกันไม้เบสบอลตี (Anti-Knockback)
+local AntiHitToggle = MainTab:CreateToggle({
+   Name = "Anti-Baseball Bat (กันตีกระเด็น)",
+   CurrentValue = false,
+   Flag = "AntiHitToggle",
+   Callback = function(Value)
+      antiBaseball = Value
+      
+      if antiBaseball then
+         task.spawn(function()
+            while antiBaseball do
+               local char = LocalPlayer.Character
+               if char and char:FindFirstChild("HumanoidRootPart") then
+                  local hrp = char.HumanoidRootPart
+                  -- รีเซ็ตความเร็วของตัวละครเมื่อโดนแรงกระแทกเกินปกติ
+                  if hrp.AssemblyLinearVelocity.Magnitude > 50 then
+                     hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                  end
+               end
+               RunService.RenderStepped:Wait()
+            end
+         end)
+      end
+   end,
+})
+
+-- 3. Toggle Pickaxe ขุดไว x100
+local FastPickaxeToggle = MainTab:CreateToggle({
+   Name = "Fast Pickaxe x100 (ขุดไว x100)",
+   CurrentValue = false,
+   Flag = "FastPickaxeToggle",
+   Callback = function(Value)
+      fastPickaxe = Value
+      
+      if fastPickaxe then
+         task.spawn(function()
+            while fastPickaxe do
+               local char = LocalPlayer.Character
+               if char and char:FindFirstChildOfClass("Humanoid") then
+                  local humanoid = char:FindFirstChildOfClass("Humanoid")
+                  -- เร่งความเร็วแอนิเมชันการขุด x100
+                  for _, track in pairs(humanoid:GetPlayingAnimationTracks()) do
+                     track:AdjustSpeed(100)
+                  end
+               end
+               
+               -- ลด HoldDuration ของจุดขุดเป็น 0 วินาที
+               for _, prompt in pairs(Workspace:GetDescendants()) do
+                  if prompt:IsA("ProximityPrompt") then
+                     prompt.HoldDuration = 0
+                  end
+               end
+               
+               task.wait(0.1)
+            end
+         end)
+      end
+   end,
+})
+
+-- 4. Toggle Hack Luck x1.9Qi
+local HackLuckToggle = MainTab:CreateToggle({
+   Name = "Hack Luck x1.9Qi (เพิ่มดวงสุ่ม)",
+   CurrentValue = false,
+   Flag = "HackLuckToggle",
+   Callback = function(Value)
+      hackLuck = Value
+      
+      if hackLuck then
+         task.spawn(function()
+            while hackLuck do
+               -- ส่ง Remote ขอเปิด/เพิ่มค่า Luck ไปยัง Server
+               pcall(function()
+                  local args = {
+                     "luck x1.9qi",
+                     1.9e18
+                  }
+                  local remote = ReplicatedStorage:FindFirstChild("RGX") and ReplicatedStorage.RGX:FindFirstChild("RIO")
+                  if remote then
+                     remote:FireServer(unpack(args))
+                  end
+               end)
+               task.wait(1)
+            end
+         end)
+      end
+   end,
+})
